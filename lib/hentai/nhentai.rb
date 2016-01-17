@@ -15,7 +15,7 @@ module Hentai
 
     class Doujin
       attr_accessor :upload_date, :num_favorites, :media_id, :title, :cover,
-                    :pages, :language, :artist, :tags, :group, :parody, 
+                    :pages, :language, :artist, :tags, :group, :parody,
                     :category, :scanlator, :id, :num_pages
 
       def initialize(hash)
@@ -23,8 +23,8 @@ module Hentai
         @num_favorites = hash["num_favorites"]
         @media_id = hash["media_id"]
         @title = Title.new hash["title"]
-        @cover = Picture.new hash["images"]["cover"], 
-                THUMB_BASE_URL + "/galleries/" + media_id + "/thumb.jpg"
+        @cover = Picture.new hash["images"]["cover"],
+                             THUMB_BASE_URL + "/galleries/" + media_id + "/thumb.jpg"
         @pages = get_pages hash["images"]["pages"], media_id
 
         # Language, artist, characters, category, tags, group, parody, and possibly
@@ -37,17 +37,17 @@ module Hentai
       end
 
       private
-        def get_pages(images, media_id)
-          pages = []
-          images.each_with_index do |image, index|
-            # XXX: check image type
-            pages.push Picture.new image, 
-                      IMAGE_BASE_URL + "/galleries/" + media_id + 
-                      "/" + (index+1).to_s + ".jpg"
-          end
-
-          pages
+      def get_pages(images, media_id)
+        pages = []
+        images.each_with_index do |image, index|
+          # XXX: check image type
+          pages.push Picture.new image,
+                                 IMAGE_BASE_URL + "/galleries/" + media_id +
+                                     "/" + (index+1).to_s + ".jpg"
         end
+
+        pages
+      end
 
     end
 
@@ -73,11 +73,34 @@ module Hentai
     end
 
     # Module methods
-    def NHentai.search(options = {})
-      tag = options.fetch :tag
+    def NHentai.search(text: "", tags: [], excluded_tags: [])
+
+
+      # Everything can be searched via the builtin search through
+      # BASE_URL/search/?q=x where x is the query.
+      #
+      # Tags
+      #   tags can be searched by appending 'tag:"cool_tag"' to the query
+      #   tags can be excluded by appending '-tag:"cool_tag"' to the query
+
+      # construct the query
+      query = "#{BASE_URL}/search/?q="
+
+      # text
+      query += "#{text} "
+
+      # tags
+      tags.each do |tag|
+        query += "tag:\"#{tag}\" "
+      end
+
+      # excluded tags
+      excluded_tags.each do |tag|
+        query += "-tag:\"#{tag}\" "
+      end
 
       # open url
-      page = Nokogiri::HTML(open(BASE_URL + "/tag/" + tag))
+      page = Nokogiri::HTML(open(query))
 
       # we first need to all doujins on a page. they look like this
       #
@@ -101,14 +124,14 @@ module Hentai
         # `link' looks like: /g/154427/
 
         json = JSON.parse(RestClient.get(BASE_URL + link.attribute("href") + "json"))
-        
+
         doujin = Doujin.new(json)
 
         doujins.push doujin
 
       end
 
-     doujins 
+      doujins
 
     end
 
