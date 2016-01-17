@@ -73,11 +73,34 @@ module Hentai
     end
 
     # Module methods
-    def NHentai.search(options = {})
-      tag = options.fetch :tag
+    def NHentai.search(text: "", tags: [], excluded_tags: [])
+
+
+      # Everything can be searched via the builtin search through
+      # BASE_URL/search/?q=x where x is the query.
+      #
+      # Tags
+      #   tags can be searched by appending 'tag:"cool_tag"' to the query
+      #   tags can be excluded by appending '-tag:"cool_tag"' to the query
+
+      # construct the query
+      query = "#{BASE_URL}/search/?q="
+
+      # text
+      query += "#{text} "
+
+      # tags
+      tags.each do |tag|
+        query += "tag:\"#{tag}\" "
+      end
+
+      # excluded tags
+      excluded_tags.each do |tag|
+        query += "-tag:\"#{tag}\" "
+      end
 
       # open url
-      page = Nokogiri::HTML(open(BASE_URL + "/tag/" + tag))
+      page = Nokogiri::HTML(open(query))
 
       # we first need to all doujins on a page. they look like this
       #
