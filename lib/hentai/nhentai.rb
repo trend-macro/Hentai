@@ -7,7 +7,8 @@ module NHentai
 
   # Constants
   BASE_URL = "http://nhentai.net"
-  IMAGE_BASE_URL = "http://t.nhentai.net"
+  IMAGE_BASE_URL = "http://i.nhentai.net"
+  THUMB_BASE_URL = "http://t.nhentai.net"
 
   # Class defs
 
@@ -17,21 +18,21 @@ module NHentai
                   :category, :scanlator, :id, :num_pages
 
     def initialize(hash)
-      upload_date = hash["upload_date"]
-      num_favorites = hash["num_favorites"]
-      media_id = hash["media_id"]
-      title = Title.new hash["title"]
-      cover = Picture.new hash["images"]["cover"], 
-              IMAGE_BASE_URL + "/galleries/" + media_id + "/thumb.jpg"
-      pages = get_pages hash["images"]["pages"], media_id
+      @upload_date = hash["upload_date"]
+      @num_favorites = hash["num_favorites"]
+      @media_id = hash["media_id"]
+      @title = Title.new hash["title"]
+      @cover = Picture.new hash["images"]["cover"], 
+              THUMB_BASE_URL + "/galleries/" + media_id + "/thumb.jpg"
+      @pages = get_pages hash["images"]["pages"], media_id
 
       # Languae, artist, characters, category, tags, group, parody, and possibly
       # others are treated as "tags" in the shitty JSON API. Each of these
       # attributes can have multiple values. Need to figure out a good way to
       # handle this.
 
-      id = hash["id"]
-      num_pages = hash["num_pages"]
+      @id = hash["id"]
+      @num_pages = hash["num_pages"]
     end
 
     private
@@ -41,7 +42,7 @@ module NHentai
           # XXX: check image type
           pages.push Picture.new image, 
                     IMAGE_BASE_URL + "/galleries/" + media_id + 
-                    "/" + index.to_s + ".jpg"
+                    "/" + (index+1).to_s + ".jpg"
         end
 
         pages
@@ -53,8 +54,8 @@ module NHentai
     attr_accessor :english, :japanese
 
     def initialize(hash)
-      english = hash[:english]
-      japanese = hash[:japanese]
+      @english = hash["english"]
+      @japanese = hash["japanese"]
     end
 
   end
@@ -63,10 +64,10 @@ module NHentai
     attr_accessor :height, :width, :type, :url
 
     def initialize(hash, url)
-      height = hash["height"]
-      width = hash["width"]
-      type = hash["t"]
-      self.url = url
+      @height = hash["h"]
+      @width = hash["w"]
+      @type = hash["t"]
+      @url = url
     end
   end
 
@@ -106,7 +107,7 @@ module NHentai
 
     end
 
-    doujins
+   doujins 
 
   end
 
